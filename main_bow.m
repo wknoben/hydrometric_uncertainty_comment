@@ -1,5 +1,6 @@
 %% Setup
 addpath('./export_fig-master')
+mkdir('./fig') % this is helpful for users grabbing the code of GitHub
 
 %% Data preprocessing
 % Data was extracted from the Environment and Climate Change Canada 
@@ -39,7 +40,7 @@ data_h = retime(data_5min,'hourly','mean');
 
 % 2. Synthetic hydrograph (original + synthetic error as per Eq. 4 in OV22)
 % Create synthetic data
-alpha = 0.01; beta = 0; 
+alpha = 0.01; beta = 0;
 variance = (alpha.*data_h.(qobs_var) + beta.*mean(data_h.(qobs_var))).^2; % Eq. 4
 rng_settings = rng(0); % For reproducibility
 data_h.synthetic_discharge_m3s = data_h.(qobs_var) + normrnd(0,sqrt(variance));
@@ -58,10 +59,26 @@ true_error = [alpha*fit_2(1,1) + beta*mean(tab_2(:,1)), alpha*fit_2(2,1) + beta*
 
 %% Figure 1 - 6 plots + insets
 x = datenum(data_h.(time_var)(1:end-3)); % error_estimation() returns mean flow over a 4-timestep window, so we don't use the full timeseries here
-inx = [3360,3410]; iny = [228,240]; % Inset window for plots (a) and (c)
-dates = [2545,6217]; % Hydrograph X-limit: May-1 to Oct-1. [1825,6217] Apr-1 to Oct-1
-
+xlims = [datenum('01-May-2021'), datenum('01-Oct-2021');                    % Plot: original hydrograph
+         nan , nan;                                                         % Plot: sorted flows vs estimated sigma
+         nan , nan;                                                         % Plot: sorted flows vs estimated sigma on double log scale
+         datenum('01-May-2021'), datenum('01-Oct-2021');                    % Plot: corrupted hydrograph
+         nan , nan;                                                         % Plot: sorted corrupted flows vs estimated sigma
+         nan , nan;                                                         % Plot: sorted corrupted flows vs estimated sigma on double log scale
+         datenum('03-Jun-2021 23:00:00'), datenum('06-Jun-2021 01:00:00');  % Plot: top inset, flow peak
+         datenum('03-Jun-2021 23:00:00'), datenum('06-Jun-2021 01:00:00')]; % Plot: bottom inset, flow peak
+ylims = [nan, nan;
+         0  , 0.5;
+         nan, nan;
+         nan, nan;
+         nan, nan;
+         nan, nan;
+         228, 240;
+         228, 240];
+annotate = true;
+     
 make_plot(x,Y_sig_unsorted_1, Y_sig_1, tab_1, fit_1, ...
             Y_sig_unsorted_2, Y_sig_2, tab_2, fit_2, alpha, beta, true_error, ...
-            qobs_units, inx, iny, dates, 'Fig1_Bow_8Plots_300dpi.png')
+            qobs_units, ...
+            xlims, ylims, annotate, './fig/Fig1_Bow_8Plots_300dpi.png')
 

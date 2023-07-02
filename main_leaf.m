@@ -1,5 +1,6 @@
 %% Setup
 addpath('./export_fig-master')
+mkdir('./fig') % this is helpful for users grabbing the code of GitHub
 
 %% Data preprocessing
 % Data was extracted from the hourly observations made available by Gauch
@@ -58,11 +59,27 @@ true_error = [alpha*fit_2(1,1) + beta*mean(tab_2(:,1)), alpha*fit_2(2,1) + beta*
 
 %% Figure 1
 x = datenum(data_h_sub.(time_var)(1:end-3)); % error_estimation() returns mean flow over a 4-timestep window, so we don't use the full timeseries here
-inx = [1985,2010]; iny = [0.91,0.99]; % Inset window for plots (a) and (c); Highest peak
-dates = [556,5644]; % Nov-1 to Jul-1. Full thing: [1,8998]
+xlims = [datenum('01-Nov-2018'), datenum('01-Jun-2019');                    % Plot: original hydrograph
+         nan , nan;                                                         % Plot: sorted flows vs estimated sigma
+         nan , nan;                                                         % Plot: sorted flows vs estimated sigma on double log scale
+         datenum('01-Nov-2018'), datenum('01-Jun-2019');                    % Plot: corrupted hydrograph
+         nan , nan;                                                         % Plot: sorted corrupted flows vs estimated sigma
+         nan , nan;                                                         % Plot: sorted corrupted flows vs estimated sigma on double log scale
+         datenum('30-Dec-2018 13:00:00'), datenum('31-Dec-2018 14:00:00');  % Plot: top inset, flow peak
+         datenum('30-Dec-2018 13:00:00'), datenum('31-Dec-2018 14:00:00')]; % Plot: bottom inset, flow peak
+ylims = [nan, nan;
+         0  , 0.002;
+         nan, nan;
+         nan, nan;
+         nan, nan;
+         nan, nan;
+         0.91,0.99;
+         0.91,0.99];
+annotate = false;
 
 make_plot(x,Y_sig_unsorted_1, Y_sig_1, tab_1, fit_1, ...
             Y_sig_unsorted_2, Y_sig_2, tab_2, fit_2, alpha, beta, true_error, ...
-            qobs_units, inx, iny, dates, 'Fig1_Leaf_8Plots_300dpi.png')
+            qobs_units, ...
+            xlims, ylims, annotate, './fig/Fig1_Leaf_8Plots_300dpi.png')
 
 
